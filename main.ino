@@ -1,12 +1,11 @@
 /*
 ...:::  Bachelor Thesis Support :::...
-  Author  : Jan GÅ‚os
+  Author  : Jan Głos
   Date  : 25/03/18
 */
 
 #define BENDING_PIN 0
 #define LED_PIN 13
-#define DIFFERENCE 50
 
 int bending_old = 0;
 int diff = 0;
@@ -15,12 +14,10 @@ int val_zero = 0;
 void setup(){
 
   pinMode(LED_PIN, OUTPUT);
-analogWrite(LED_PIN, 0);
+analogWrite(LED_PIN, 100);
     Serial.begin(9600);
   while (!Serial) {
   }
-analogWrite(LED_PIN, 150);
-delay(1000);
 val_zero = analogRead(BENDING_PIN);
 Serial.println("Initial Value :");
 Serial.println(val_zero);
@@ -31,12 +28,13 @@ void loop(){
 
   int bending = analogRead(BENDING_PIN);
 
-  if((bending - DIFFERENCE) < val_zero){
+  if((bending - val_zero) < 0){
     diff = val_zero - bending;
-  }else if(val_zero < (bending + DIFFERENCE)){
+  }else if((bending - val_zero) > 0){
     diff = bending - val_zero;
-  }else{
-    analogWrite(LED_PIN, bending_old);
+  }else if((bending - val_zero) == 0){
+    diff = -1;
+    //analogWrite(LED_PIN, bending_old);
   };
 
 
@@ -45,6 +43,9 @@ void loop(){
     bending_old = diff;
     Serial.println("New value : ");
     Serial.println(diff);
+  }else if(diff = -1){
+    analogWrite(LED_PIN, bending_old);
+    Serial.println("No difference, old value");
   }else{
     analogWrite(LED_PIN, bending_old);
     Serial.println("too high difference, old value");
@@ -60,6 +61,6 @@ void loop(){
   Serial.println(bending);
   bending_old = bending;
   */
-  delay(100);
+  delay(10);
 
 }
