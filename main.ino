@@ -5,7 +5,8 @@
 */
 
 #define BENDING_PIN 0
-#define LED_PIN 13
+#define LED_PIN 11
+#define MIN_DIFF 10
 
 int bending_old = 0;
 int diff = 0;
@@ -31,20 +32,23 @@ void loop(){
   if((bending - val_zero) < 0){
     diff = val_zero - bending;
   }else if((bending - val_zero) > 0){
-    diff = bending - val_zero;
+    diff = 2*(bending - val_zero); //Different value for second site of sensor
   }else if((bending - val_zero) == 0){
     diff = -1;
-    //analogWrite(LED_PIN, bending_old);
   };
 
 
   if(0 < diff < 150){
-    analogWrite(LED_PIN, diff);
     bending_old = diff;
     Serial.println("New value : ");
     Serial.println(diff);
+    if(diff > MIN_DIFF){
+      analogWrite(LED_PIN, diff);
+    }else{
+      analogWrite(LED_PIN, 0);
+    }
   }else if(diff = -1){
-    analogWrite(LED_PIN, bending_old);
+    analogWrite(LED_PIN, 0);
     Serial.println("No difference, old value");
   }else{
     analogWrite(LED_PIN, bending_old);
