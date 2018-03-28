@@ -6,7 +6,8 @@
 
 #define BENDING_PIN 0
 #define LED_PIN 11
-#define MIN_DIFF 10
+#define MIN_DIFF 7
+#define ZERO_VALUE 1
 
 int bending_old = 0;
 int diff = 0;
@@ -15,14 +16,17 @@ int val_zero = 0;
 void setup(){
 
   pinMode(LED_PIN, OUTPUT);
-analogWrite(LED_PIN, 100);
+
+analogWrite(LED_PIN, ZERO_VALUE);
     Serial.begin(9600);
   while (!Serial) {
   }
 val_zero = analogRead(BENDING_PIN);
 Serial.println("Initial Value :");
 Serial.println(val_zero);
+delay(5000);
 analogWrite(LED_PIN, 0);
+
 }
 
 void loop(){
@@ -34,25 +38,28 @@ void loop(){
   }else if((bending - val_zero) > 0){
     diff = 2*(bending - val_zero); //Different value for second site of sensor
   }else if((bending - val_zero) == 0){
-    diff = -1;
+    diff = bending;
   };
 
 
-  if(0 < diff < 150){
-    bending_old = diff;
-    Serial.println("New value : ");
+  if(5 < diff < 150){
+    bending_old = ZERO_VALUE + (diff);
+    //Serial.println("New value : ");
     Serial.println(diff);
     if(diff > MIN_DIFF){
-      analogWrite(LED_PIN, diff);
+      analogWrite(LED_PIN, ZERO_VALUE + (diff));
     }else{
-      analogWrite(LED_PIN, 0);
+      analogWrite(LED_PIN, 5);
     }
-  }else if(diff = -1){
-    analogWrite(LED_PIN, 0);
-    Serial.println("No difference, old value");
+  }else if(0 < diff < 5){
+    analogWrite(LED_PIN, 5);
+  }
+  else if(diff = -1){
+    analogWrite(LED_PIN, bending_old);
+    //Serial.println("No difference, old value");
   }else{
     analogWrite(LED_PIN, bending_old);
-    Serial.println("too high difference, old value");
+    //Serial.println("too high difference, old value");
   };
 
 

@@ -12,6 +12,9 @@ int bending_old = 0;
 int diff = 0;
 int val_zero = 0;
 
+int *v_zero = 0;
+int *v_r = 0;
+int *v_l = 0;
 void setup(){
 
   pinMode(LED_PIN, OUTPUT);
@@ -23,6 +26,10 @@ val_zero = analogRead(BENDING_PIN);
 Serial.println("Initial Value :");
 Serial.println(val_zero);
 analogWrite(LED_PIN, 0);
+
+
+startUp(v_zero, v_l, v_r);
+val_zero = *v_zero;
 }
 
 void loop(){
