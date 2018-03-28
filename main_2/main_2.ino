@@ -6,7 +6,7 @@
 
 #define BENDING_PIN 0
 #define LED_PIN 11
-#define MIN_DIFF 7
+#define MIN_DIFF 14
 #define MIN_DIFF_BLINDING 20
 #define MIN_VALUE 10
 #define MAX_VALUE 99
@@ -19,21 +19,21 @@
 //#define BLINDING
 //#define BLINDING_PANIC
 //#define TREND
-//#define TREND_TRUE
-#define TREND_TRUE_WAIT
+#define TREND_TRUE
+//#define TREND_TRUE_WAIT
 
 int bending_old = 0;
 int val_zero = 0;
 
 void lightsUp(){
-  for(int i = MIN_VALUE; i < MAX_VALUE + 10; i ++){
+  for(int i = MIN_VALUE; i < MAX_VALUE + 30; i ++){
     analogWrite(LED_PIN, i);
     delay(19);
   }
 }
 
 void lightsDown(){
-  for(int i = MAX_VALUE + 10; i > MIN_VALUE; i --){
+  for(int i = MAX_VALUE + 30; i > MIN_VALUE; i --){
     analogWrite(LED_PIN, i);
     delay(10);
   }
@@ -155,14 +155,21 @@ while(1){
   if((diff > MIN_DIFF) && noLight){
 
     lightsUp();
-    while(diff > MIN_DIFF){};
+    while(diff > MIN_DIFF){
+      bending = analogRead(BENDING_PIN);
+      delay(1);
+
+      if((bending - val_zero) < 0){             //Value from first side of sensor
+        diff = val_zero - bending;
+      }else if((bending - val_zero) > 0){       //Value from second side of sensor
+        diff = 2*(bending - val_zero);          //Quantity becouse of smaller value
+      }else if((bending - val_zero) == 0){      //Equal - no motion from sensor
+        diff = 0;
+      };
+    };
     lightsDown();
     noLight = true;
-    
-  }else{
-    if(noLight){
-      analogWrite(LED_PIN, MIN_VALUE);
-    }
+
   }
 }
 #endif
