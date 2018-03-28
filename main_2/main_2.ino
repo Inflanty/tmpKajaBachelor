@@ -11,11 +11,13 @@
 #define MAX_VALUE 99
 #define SAMPLE_LEN 6
 
+#define INCREMENTING 1
+#define AVERANGE 1
+
 int bending_old = 0;
 int val_zero = 0;
 
 void setup(){
-
   pinMode(LED_PIN, OUTPUT);
   analogWrite(LED_PIN, 100);
   Serial.begin(9600);
@@ -30,6 +32,7 @@ void loop(){
   int sample_tab[SAMPLE_LEN] = {0};
   int bending = 0, diff = 0, diff_avr = 0;
 
+#ifdef AVERANGE
   for(int i = 0; i < SAMPLE_LEN; i ++){
     bending = analogRead(BENDING_PIN);
     delay(1);
@@ -52,20 +55,40 @@ void loop(){
   }
 
   diff_avr = diff/SAMPLE_LEN;
+#else
+bending = analogRead(BENDING_PIN);
+delay(1);
 
+if((bending - val_zero) < 0){             //Value from first side of sensor
+  diff = val_zero - bending;
+}else if((bending - val_zero) > 0){       //Value from second side of sensor
+  diff = 2*(bending - val_zero);          //Quantity becouse of smaller value
+}else if((bending - val_zero) == 0){      //Equal - no motion from sensor
+  diff = 0;
+};
+#endif
+
+#ifdef INCREMENTING
   if(0 < diff_avr < MAX_VALUE){              //Normal working value
-    //analogWrite(LED_PIN, (MIN_VALUE + diff_avr));
-    incrementFromTo(bedning_old, (MIN_VALUE + diff_avr), 3);
+    incrementFromTo(bending_old, (MIN_VALUE + diff_avr), 3);
     bending_old = MIN_VALUE + diff_avr;
   }else if(diff_avr = 0){                   //Zero value - for no motion
-    //analogWrite(LED_PIN, MIN_VALUE);
-    incrementFromTo(bedning_old, MIN_VALUE, 3);
+    incrementFromTo(bending_old, MIN_VALUE, 3);
     bending_old = MIN_VALUE;
   }else{                                    //Too high value >99
-    //analogWrite(LED_PIN, (MAX_VALUE + MIN_VALUE));
     incrementFromTo(bending_old, (MAX_VALUE + MIN_VALUE), 3);
     bending_old = MAX_VALUE + MIN_VALUE;
   };
+#else
+  if(0 < diff_avr < MAX_VALUE){              //Normal working value
+    analogWrite(LED_PIN, (MIN_VALUE + diff_avr));
+  }else if(diff_avr = 0){                   //Zero value - for no motion
+    analogWrite(LED_PIN, MIN_VALUE);
+  }else{                                    //Too high value >99
+    analogWrite(LED_PIN, (MAX_VALUE + MIN_VALUE));
+  };
+#endif
+
 }
 
 void startUp(int *start_val, int *left_val, int *right_val){
